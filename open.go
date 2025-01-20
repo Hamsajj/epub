@@ -1,14 +1,47 @@
 package epub
 
-import "archive/zip"
+import (
+	"archive/zip"
+	"bytes"
+	"fmt"
+	"io"
+)
 
-//Open open a epub file
-func Open(fn string) (*Book, error) {
+// Open open a epub file
+func Open(fn string) (*Book, func() error, error) {
 	fd, err := zip.OpenReader(fn)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	bk, err := loadBook(&fd.Reader)
+	if err != nil {
+		fd.Close()
+		return nil, nil, err
+	}
+
+	return bk, fd.Close, nil
+}
+
+func OpenFromReader(reader io.Reader) (*Book, error) {
+	buff := bytes.NewBuffer([]byte{})
+	size, err := io.Copy(buff, reader)
+	if err != nil {
+		return nil, fmt.Errorf("failed to copy reader to buffer: %v", err)
+	}
+
+	fd, err := zip.NewReader(bytes.NewReader(buff.Bytes()), size)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open zip reader: %v", err)
+	}
+	book, err := loadBook(fd)
 	if err != nil {
 		return nil, err
 	}
+	return book, nil
+}
 
+func loadBook(fd *zip.Reader) (*Book, error) {
 	bk := Book{fd: fd}
 	mt, err := bk.readBytes("mimetype")
 	if err == nil {
@@ -27,7 +60,6 @@ func Open(fn string) (*Book, error) {
 	}
 
 	if err != nil {
-		fd.Close()
 		return nil, err
 	}
 

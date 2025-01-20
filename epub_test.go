@@ -3,11 +3,11 @@ package epub_test
 import (
 	"testing"
 
-	"github.com/kapmahc/epub"
+	"github.com/Hamsajj/epub"
 )
 
 func TestEpub(t *testing.T) {
-	bk, err := open(t, "test.epub")
+	bk, err := open(t, "testdata/alice_adventures.epub")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -16,15 +16,15 @@ type Book struct {
 	Container Container `json:"-"`
 	Mimetype  string    `json:"-"`
 
-	fd *zip.ReadCloser
+	fd *zip.Reader
 }
 
-//Open open resource file
+// Open open resource file
 func (p *Book) Open(n string) (io.ReadCloser, error) {
 	return p.open(p.filename(n))
 }
 
-//Files list resource files
+// Files list resource files
 func (p *Book) Files() []string {
 	var fns []string
 	for _, f := range p.fd.File {
@@ -33,12 +33,7 @@ func (p *Book) Files() []string {
 	return fns
 }
 
-//Close close file reader
-func (p *Book) Close() {
-	p.fd.Close()
-}
-
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 func (p *Book) filename(n string) string {
 	return path.Join(path.Dir(p.Container.Rootfile.Path), n)
 }

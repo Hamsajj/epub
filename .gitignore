@@ -1,4 +1,5 @@
 *.epub
+!testdata/*.epub
 
 *.swp
 .*~
