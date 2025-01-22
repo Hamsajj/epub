@@ -25,12 +25,15 @@ func Open(fn string) (*Book, func() error, error) {
 
 func OpenFromReader(reader io.Reader) (*Book, error) {
 	buff := bytes.NewBuffer([]byte{})
-	size, err := io.Copy(buff, reader)
+	_, err := io.Copy(buff, reader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to copy reader to buffer: %v", err)
 	}
+	return OpenFromBytes(buff.Bytes())
+}
 
-	fd, err := zip.NewReader(bytes.NewReader(buff.Bytes()), size)
+func OpenFromBytes(data []byte) (*Book, error) {
+	fd, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to open zip reader: %v", err)
 	}
